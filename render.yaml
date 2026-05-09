@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: stick-arena-phaser-v5
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
