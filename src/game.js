@@ -11,10 +11,19 @@ export function createGame(parent) {
     width: window.innerWidth,
     height: window.innerHeight,
     backgroundColor: "#020617",
+
     scale: {
       mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH,
+      width: "100%",
+      height: "100%",
+      expandParent: true,
     },
+
+    input: {
+      activePointers: 8,
+    },
+
     physics: {
       default: "arcade",
       arcade: {
@@ -22,11 +31,14 @@ export function createGame(parent) {
         debug: false,
       },
     },
+
     render: {
       antialias: true,
       pixelArt: false,
       roundPixels: false,
+      powerPreference: "high-performance",
     },
+
     scene: [BootScene, MenuScene, SelectScene, BattleScene],
   });
 }
