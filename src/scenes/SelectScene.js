@@ -1,7 +1,4 @@
-import Phaser from "phaser";
-import { CHARACTERS } from "../data/characters.js";
-import { WEAPONS } from "../data/weapons.js";
-import { MAPS } from "../data/maps.js";
+import { CHARACTERS, MAPS, WEAPONS } from "../data/gameData.js";
 
 export default class SelectScene extends Phaser.Scene {
   constructor() {
@@ -9,46 +6,130 @@ export default class SelectScene extends Phaser.Scene {
   }
 
   create() {
-    this.selectedCharacter = CHARACTERS[0].id;
-    this.selectedWeapon = WEAPONS[0].id;
-    this.selectedMap = MAPS[0].id;
+    this.selectedCharacter = CHARACTERS[0];
+    this.selectedMap = MAPS[0];
+    this.selectedWeapon = WEAPONS[0];
 
-    const { width, height } = this.scale;
-    this.cameras.main.setBackgroundColor("#020617");
-    this.add.text(width / 2, 42, "SELEÇÃO", { fontFamily: "Arial", fontSize: 36, fontStyle: "900", color: "#fff", stroke: "#22d3ee", strokeThickness: 4 }).setOrigin(0.5);
+    this.renderUI();
 
-    this.add.text(60, 92, "Personagem", { fontFamily: "Arial", fontSize: 22, color: "#e2e8f0" });
-    CHARACTERS.forEach((c, i) => this.option(60, 135 + i * 62, c.name + " — " + c.outfit, c.color, () => this.selectedCharacter = c.id));
-
-    this.add.text(60, 335, "Arma", { fontFamily: "Arial", fontSize: 22, color: "#e2e8f0" });
-    WEAPONS.forEach((w, i) => this.option(60, 378 + i * 55, w.name, w.glow, () => this.selectedWeapon = w.id));
-
-    this.add.text(width * 0.58, 92, "Mapa", { fontFamily: "Arial", fontSize: 22, color: "#e2e8f0" });
-    MAPS.forEach((m, i) => this.option(width * 0.58, 135 + i * 62, m.name, m.accent, () => this.selectedMap = m.id));
-
-    this.button(width / 2, height - 80, "COMEÇAR BATALHA", () => {
-      this.scene.start("BattleScene", { characterId: this.selectedCharacter, weaponId: this.selectedWeapon, mapId: this.selectedMap });
-    });
-
-    this.button(86, height - 40, "VOLTAR", () => this.scene.start("MenuScene"), 150, 42);
-  }
-
-  option(x, y, label, color, callback) {
-    const box = this.add.rectangle(x + 170, y, 330, 44, 0x0f172a, 0.92).setInteractive({ useHandCursor: true });
-    box.setStrokeStyle(2, color, 0.75);
-    this.add.circle(x + 18, y, 13, color, 0.9);
-    this.add.text(x + 42, y, label, { fontFamily: "Arial", fontSize: 15, color: "#fff" }).setOrigin(0, 0.5);
-    box.on("pointerdown", () => {
-      callback();
-      box.setFillStyle(color, 0.42);
-      this.time.delayedCall(180, () => box.setFillStyle(0x0f172a, 0.92));
+    this.scale.on("resize", () => {
+      this.renderUI();
     });
   }
 
-  button(x, y, label, cb, w = 280, h = 54) {
-    const b = this.add.rectangle(x, y, w, h, 0x2563eb, 0.95).setInteractive({ useHandCursor: true });
-    b.setStrokeStyle(2, 0x67e8f9, 0.85);
-    this.add.text(x, y, label, { fontFamily: "Arial", fontSize: 18, fontStyle: "900", color: "#fff" }).setOrigin(0.5);
-    b.on("pointerdown", cb);
+  renderUI() {
+    this.children.removeAll();
+
+    const w = this.scale.width;
+    const h = this.scale.height;
+    const isLandscape = w > h;
+
+    const titleSize = isLandscape ? 34 : 42;
+    const smallText = isLandscape ? 16 : 22;
+    const itemHeight = isLandscape ? 44 : 58;
+    const gap = isLandscape ? 8 : 14;
+
+    this.add.rectangle(w / 2, h / 2, w, h, 0x020617);
+
+    this.add.text(w / 2, 28, "SELEÇÃO", {
+      fontFamily: "Arial",
+      fontSize: titleSize,
+      fontStyle: "900",
+      color: "#67e8f9",
+      stroke: "#0e7490",
+      strokeThickness: 5,
+    }).setOrigin(0.5, 0);
+
+    const colW = isLandscape ? w * 0.31 : w * 0.86;
+    const startY = isLandscape ? 90 : 110;
+
+    if (isLandscape) {
+      this.createColumn("Personagem", CHARACTERS, 24, startY, colW, itemHeight, gap, smallText, "character");
+      this.createColumn("Mapa", MAPS, w * 0.35, startY, colW, itemHeight, gap, smallText, "map");
+      this.createColumn("Arma", WEAPONS, w * 0.68, startY, colW, itemHeight, gap, smallText, "weapon");
+    } else {
+      this.createColumn("Personagem", CHARACTERS, w * 0.07, startY, colW, itemHeight, gap, smallText, "character");
+      this.createColumn("Mapa", MAPS, w * 0.07, startY + 245, colW, itemHeight, gap, smallText, "map");
+      this.createColumn("Arma", WEAPONS, w * 0.07, startY + 475, colW, itemHeight, gap, smallText, "weapon");
+    }
+
+    const btnW = isLandscape ? 180 : w * 0.72;
+    const btnH = isLandscape ? 48 : 58;
+    const btnY = h - (isLandscape ? 62 : 90);
+
+    const playBtn = this.add.rectangle(w / 2, btnY, btnW, btnH, 0x22d3ee, 0.95)
+      .setStrokeStyle(3, 0xffffff, 0.35)
+      .setInteractive({ useHandCursor: true });
+
+    this.add.text(w / 2, btnY, "JOGAR", {
+      fontFamily: "Arial",
+      fontSize: isLandscape ? 22 : 28,
+      fontStyle: "900",
+      color: "#ffffff",
+    }).setOrigin(0.5);
+
+    playBtn.on("pointerdown", () => {
+      this.scene.start("BattleScene", {
+        character: this.selectedCharacter,
+        map: this.selectedMap,
+        weapon: this.selectedWeapon,
+      });
+    });
+
+    const back = this.add.text(20, h - 34, "← Voltar", {
+      fontFamily: "Arial",
+      fontSize: isLandscape ? 16 : 22,
+      color: "#ffffff",
+    }).setInteractive({ useHandCursor: true });
+
+    back.on("pointerdown", () => {
+      this.scene.start("MenuScene");
+    });
+  }
+
+  createColumn(title, items, x, y, width, itemHeight, gap, fontSize, type) {
+    this.add.text(x, y - 32, title, {
+      fontFamily: "Arial",
+      fontSize: fontSize + 6,
+      color: "#ffffff",
+    });
+
+    items.forEach((item, index) => {
+      const yy = y + index * (itemHeight + gap);
+      const color = item.color || 0x22d3ee;
+
+      const selected =
+        (type === "character" && this.selectedCharacter.id === item.id) ||
+        (type === "map" && this.selectedMap.id === item.id) ||
+        (type === "weapon" && this.selectedWeapon.id === item.id);
+
+      const box = this.add.rectangle(
+        x + width / 2,
+        yy + itemHeight / 2,
+        width,
+        itemHeight,
+        0x0f172a,
+        selected ? 0.95 : 0.62
+      )
+        .setStrokeStyle(selected ? 4 : 2, color, selected ? 1 : 0.6)
+        .setInteractive({ useHandCursor: true });
+
+      this.add.circle(x + 22, yy + itemHeight / 2, itemHeight * 0.28, color, 1);
+
+      const label = item.name || item.id;
+
+      this.add.text(x + 48, yy + itemHeight / 2, label, {
+        fontFamily: "Arial",
+        fontSize,
+        color: "#ffffff",
+      }).setOrigin(0, 0.5);
+
+      box.on("pointerdown", () => {
+        if (type === "character") this.selectedCharacter = item;
+        if (type === "map") this.selectedMap = item;
+        if (type === "weapon") this.selectedWeapon = item;
+        this.renderUI();
+      });
+    });
   }
 }
