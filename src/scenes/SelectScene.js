@@ -1,5 +1,5 @@
 import { CHARACTERS, MAPS, WEAPONS } from "../data/gameData.js";
-
+import Phaser from "phaser";
 export default class SelectScene extends Phaser.Scene {
   constructor() {
     super("SelectScene");
