@@ -1,4 +1,61 @@
 import Phaser from "phaser";
+import { CHARACTERS, MAPS, WEAPONS } from "../data/gameData.js";
+
+export default class SelectScene extends Phaser.Scene {
+  constructor() {
+    super("SelectScene");
+  }
+
+  create() {
+    this.selectedCharacter = CHARACTERS[0];
+    this.selectedMap = MAPS[0];
+    this.selectedWeapon = WEAPONS[0];
+
+    this.renderUI();
+
+    this.scale.on("resize", () => {
+      this.renderUI();
+    });
+  }
+
+  renderUI() {
+    this.children.removeAll();
+
+    const w = this.scale.width;
+    const h = this.scale.height;
+    const landscape = w > h;
+
+    this.add.rectangle(w / 2, h / 2, w, h, 0x020617);
+
+    this.add.text(w / 2, 30, "SELEÇÃO", {
+      fontFamily: "Arial",
+      fontSize: landscape ? 34 : 44,
+      fontStyle: "900",
+      color: "#67e8f9",
+    }).setOrigin(0.5, 0);
+
+    this.createSection(
+      "PERSONAGEM",
+      CHARACTERS,
+      landscape ? 40 : 30,
+      landscape ? 100 : 100,
+      landscape ? 320 : w - 60,
+      "character"
+    );
+
+    this.createSection(
+      "MAPA",
+      MAPS,
+      landscape ? w / 2 - 80 : 30,
+      landscape ? 100 : 360,
+      landscape ? 320 : w - 60,
+      "map"
+    );
+
+    this.createSection(
+      "ARMA",
+      WEAPONS,
+      landscape ? w - 360 : 30,
       landscape ? 100 : 620,
       landscape ? 320 : w - 60,
       "weapon"
@@ -40,6 +97,7 @@ import Phaser from "phaser";
 
     list.forEach((item, index) => {
       const yy = y + index * 72;
+
       const selected =
         (type === "character" && this.selectedCharacter.id === item.id) ||
         (type === "map" && this.selectedMap.id === item.id) ||
