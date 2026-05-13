@@ -1,54 +1,44 @@
 import Phaser from "phaser";
-
 export default class MenuScene extends Phaser.Scene {
   constructor() {
     super("MenuScene");
   }
 
   create() {
-    const { width, height } = this.scale;
-    this.cameras.main.setBackgroundColor("#020617");
-    this.add.rectangle(width / 2, height / 2, width, height, 0x020617);
+    const w = this.scale.width;
+    const h = this.scale.height;
 
-    for (let i = 0; i < 80; i++) {
-      const x = Phaser.Math.Between(0, width);
-      const y = Phaser.Math.Between(0, height);
-      const star = this.add.circle(x, y, Phaser.Math.FloatBetween(0.6, 2), 0x67e8f9, Phaser.Math.FloatBetween(0.15, 0.7));
-      this.tweens.add({ targets: star, alpha: 0.1, duration: Phaser.Math.Between(900, 1800), yoyo: true, repeat: -1 });
-    }
+    this.add.rectangle(w / 2, h / 2, w, h, 0x020617);
 
-    this.add.text(width / 2, height * 0.26, "NINJA ARENA V5", {
+    this.add.text(w / 2, h * 0.22, "STICK ARENA", {
       fontFamily: "Arial",
-      fontSize: Math.min(54, width * 0.1),
+      fontSize: 52,
+      fontStyle: "900",
+      color: "#67e8f9",
+      stroke: "#0f172a",
+      strokeThickness: 8,
+    }).setOrigin(0.5);
+
+    this.add.text(w / 2, h * 0.32, "V5 PHASER EDITION", {
+      fontFamily: "Arial",
+      fontSize: 24,
+      color: "#ffffff",
+    }).setOrigin(0.5);
+
+    const playBtn = this.add.rectangle(w / 2, h * 0.56, 240, 70, 0x22d3ee)
+      .setInteractive({ useHandCursor: true });
+
+    playBtn.setStrokeStyle(3, 0xffffff, 0.3);
+
+    this.add.text(w / 2, h * 0.56, "JOGAR", {
+      fontFamily: "Arial",
+      fontSize: 30,
       fontStyle: "900",
       color: "#ffffff",
-      stroke: "#22d3ee",
-      strokeThickness: 6,
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, height * 0.36, "Phaser Edition • Mapas • Música • Personagens • Combos", {
-      fontFamily: "Arial",
-      fontSize: 18,
-      color: "#cbd5e1",
-    }).setOrigin(0.5);
-
-    this.createButton(width / 2, height * 0.52, "JOGAR", () => this.scene.start("SelectScene"));
-    this.createButton(width / 2, height * 0.63, "TREINO RÁPIDO", () => this.scene.start("BattleScene", { characterId: "ryu-neon", weaponId: "katana", mapId: "neon" }));
-
-    this.add.text(width / 2, height * 0.84, "PC: A/D, W, S, J, K, L, Shift, B • Mobile: botões flutuantes", {
-      fontFamily: "Arial",
-      fontSize: 14,
-      color: "#94a3b8",
-    }).setOrigin(0.5);
-  }
-
-  createButton(x, y, label, callback) {
-    const box = this.add.rectangle(x, y, 280, 58, 0x2563eb, 0.9).setInteractive({ useHandCursor: true });
-    box.setStrokeStyle(2, 0x67e8f9, 0.8);
-    const text = this.add.text(x, y, label, { fontFamily: "Arial", fontSize: 22, fontStyle: "900", color: "#ffffff" }).setOrigin(0.5);
-    box.on("pointerover", () => box.setFillStyle(0x22d3ee, 0.95));
-    box.on("pointerout", () => box.setFillStyle(0x2563eb, 0.9));
-    box.on("pointerdown", callback);
-    return { box, text };
+    playBtn.on("pointerdown", () => {
+      this.scene.start("SelectScene");
+    });
   }
 }
